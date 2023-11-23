@@ -1,0 +1,1 @@
+cythonize -i -3  --exclude=__init__.py binary_vector/**/*.py
