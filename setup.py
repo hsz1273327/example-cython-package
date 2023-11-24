@@ -3,6 +3,6 @@ from Cython.Build import cythonize
 
 
 setup(
-    name='Hello world app',
-    ext_modules=cythonize("hello.pyx"),
+    ext_modules=cythonize("binary_vector/**/*.py", exclude=[
+                          "binary_vector/__init__.py", "binary_vector/binary_vector_purepy.py"]),
 )

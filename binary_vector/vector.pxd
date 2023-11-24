@@ -1,5 +1,7 @@
-from .binary_vector import BINARY_VECTOR_P
+from .binary_vector cimport BINARY_VECTOR_P
+
 cdef class Vector:
+    
     cdef BINARY_VECTOR_P data
 
     @staticmethod

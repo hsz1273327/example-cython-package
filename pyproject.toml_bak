@@ -3,7 +3,7 @@ requires = ["setuptools>=61.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "seg"
+name = "binary_vector"
 authors = [
   {name = "hsz", email = "hsz1273327@mail.com"},
 ]
@@ -13,8 +13,8 @@ classifiers = [
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
 ]
-description = "A sample Python project for seg chinese txt."
-keywords = ["seg", "chinese nlp"]
+description = "A sample Cython project for test."
+keywords = ["test"]
 license = {file = "LICENSE"}
 dynamic = ["version", "readme", "dependencies"]
 requires-python = "~=3.10"
@@ -30,11 +30,6 @@ all = ["PySimpleGUI>=4.60.4", "coverage"]
 gui = ["PySimpleGUI>=4.60.4"]
 test = ["coverage"]
 
-[project.scripts]
-seg = "seg.cmd:cmdseg"
-
-[project.gui-scripts]
-seg-gui = "seg.gui:guiseg"
 
 [tool.setuptools]
 platforms = ["all"]
