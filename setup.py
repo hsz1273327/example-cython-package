@@ -87,7 +87,8 @@ def build_spdlog() -> Tuple[str, Optional[str], Optional[str]]:
                 f'[build spdlog]{to.parent} exists but not dir,please remove it first')
             raise Exception(f"{to.parent} is not dir")
     inwondows = False
-
+    if not sys.platform.startswith('linux') and not sys.platform == 'darwin':
+        inwondows = True
     if not to.is_dir():
         # 不存在则下载后从源码安装
         to_build = to.parent.joinpath("spdlogbuild")
@@ -103,24 +104,22 @@ def build_spdlog() -> Tuple[str, Optional[str], Optional[str]]:
 
         try:
             logging.info(f'[build spdlog]compiling')
-            if sys.platform.startswith('linux') or sys.platform == 'darwin':
+            if inwondows is False:
                 # 非window平台
                 runcmd("mkdir build", cwd=to_build)
                 runcmd("cmake ..", cwd=to_build.joinpath("build"))
                 runcmd("make -j", cwd=to_build.joinpath("build"))
                 logging.info(f'[build spdlog]compile done')
-            else:
-                inwondows = True
-            # copy头文件
-            shutil.copytree(to_build.joinpath(
-                "include"), to.joinpath("include"))
-            logging.info(f'[build spdlog]copy header to {to} done')
-            # copy库文件
-            if not inwondows:
+                # copy库文件
                 to.joinpath("lib").mkdir(exist_ok=True)
                 shutil.copyfile(to_build.joinpath("build/libspdlog.a"),
                                 to.joinpath("lib/libspdlog.a"))
                 logging.info(f'[build spdlog]copy lib to {to} done')
+            # copy头文件
+            shutil.copytree(to_build.joinpath(
+                "include"), to.joinpath("include"))
+            logging.info(f'[build spdlog]copy header to {to} done')
+                
         except Exception as e:
             raise e
         finally:
