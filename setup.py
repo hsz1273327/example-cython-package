@@ -235,8 +235,6 @@ class binary_build_ext(build_ext):
         if sys.platform == 'darwin':
             ext.extra_compile_args += ["-Wc++11-extensions", "-std=c++11"]
 
-        # distutils: extra_compile_args = -Wc++11-extensions
-
         super().build_extension(ext)
 
 
