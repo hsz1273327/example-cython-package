@@ -125,8 +125,12 @@ def build_spdlog() -> Tuple[str, Optional[str], Optional[str]]:
             raise e
         finally:
             # 删除编译源文件
-            shutil.rmtree(to_build)
-            logging.info(f'[build spdlog]remove build dir {to_build} done')
+            try:
+                shutil.rmtree(to_build)
+            except Exception as e:
+                logging.warn(f'[build spdlog]remove build dir {to_build} get error, please remove it manually')
+            else:
+                logging.info(f'[build spdlog]remove build dir {to_build} done')
     else:
         logging.info('[build spdlog]already build yet')
     if inwondows:
