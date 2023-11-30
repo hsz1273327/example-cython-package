@@ -13,9 +13,6 @@
             "binary_vector"
         ],
         "language": "c++",
-        "libraries": [
-            "spdlog"
-        ],
         "name": "binary_vector.vector",
         "sources": [
             "binary_vector/vector.pyx",

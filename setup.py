@@ -231,6 +231,12 @@ class binary_build_ext(build_ext):
         for lib in add_libs:
             self.compiler.add_library(lib)
         logging.info(f'[build_ext]setting done')
+        # 针对clang:
+        if sys.platform == 'darwin':
+            ext.extra_compile_args += ["-Wc++11-extensions", "-std=c++11"]
+
+        # distutils: extra_compile_args = -Wc++11-extensions
+
         super().build_extension(ext)
 
 
