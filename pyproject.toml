@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61.0.0", "wheel", "chardet"]
+requires = ["setuptools>=61.0.0", "wheel", "chardet>=5.2.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -15,7 +15,7 @@ description = "A sample Cython project for test."
 keywords = ["test"]
 license = { file = "LICENSE" }
 dynamic = ["version", "readme", "dependencies"]
-requires-python = "~=3.10"
+requires-python = ">=3.10"
 
 [project.urls]
 changelog = "https://github.com/me/spam/blob/master/CHANGELOG.md"
