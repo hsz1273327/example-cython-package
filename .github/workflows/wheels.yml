@@ -4,12 +4,46 @@ on:
   workflow_dispatch
 
 jobs:
+  build_sdist:
+    runs-on: ubuntu-latest
+    name: Build Sdist
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+            python-version: '3.x'
+
+      - name: Install Dependencies
+        run: |
+            python -m pip install --upgrade pip
+            pip install setuptools wheel twine build
+
+      - name: Build Sdist
+        run: |
+            python -m build --sdist
+
+      - name: 'Upload Sdist'
+        uses: 'actions/upload-artifact@v3'
+        with:
+            name: packages
+            path: dist/*
+
+    #   - name: Publish Sdist
+    #     env:
+    #         TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
+    #         TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+    #     run:
+    #         twine upload dist/*
+
   build_wheels:
     name: Build wheels on ${{ matrix.os }}
+    needs: build_sdist
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-22.04, ubuntu-20.04,windows-2022, windows-2019,macOS-12, macOS-11]
+        os: [ubuntu-20.04, windows-2019, macOS-11]
 
     steps:
       - uses: actions/checkout@v4
@@ -21,17 +55,32 @@ jobs:
         with:
           platforms: all
 
-      - name: Build wheels
+      - name: Build Wheels
         uses: pypa/cibuildwheel@v2.16.2
         env:
-          # configure cibuildwheel to build native archs ('auto'), and some
-          # emulated ones
-          CIBW_ARCHS_LINUX: auto aarch64 ppc64le s390x
+
+          # 不为pypy编译
+          CIBW_SKIP: pp*
+          # linux下编译哪些arch
+          CIBW_ARCHS_LINUX: x86_64 aarch64
+          # mac下编译哪些arch
           CIBW_ARCHS_MACOS: x86_64 arm64
+          # windows下编译哪些arch
           CIBW_ARCHS_WINDOWS: AMD64
+          # 注意,不在临时虚拟环境中编译
           CIBW_BUILD_FRONTEND: "build; args: --no-isolation"
+          # 安装编译用的依赖
           CIBW_BEFORE_BUILD: pip install Cython==3.0.6 chardet==5.2.0
 
-      - uses: actions/upload-artifact@v3
+      - name: 'Upload Wheels'
+        uses: actions/upload-artifact@v3
         with:
+          name: packages
           path: ./wheelhouse/*.whl
+    
+    #   - name: Publish Wheels
+    #     env:
+    #         TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
+    #         TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+    #     run:
+    #         twine upload wheelhouse/*.whl
