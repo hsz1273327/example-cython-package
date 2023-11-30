@@ -1,1 +1,9 @@
-cythonize -i -3  --exclude=binary_vector/__init__.py  --exclude=binary_vector/binary_vector_purepy.py binary_vector/**/*.py
+cythonize -i -3 binary_vector/**/*.pyx
+
+
+python -m build --sdist
+
+python -m build --wheel --no-isolation
+
+
+python setup.py build_ext --inplace

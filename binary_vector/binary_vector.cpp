@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 #define T BINARY_VECTOR_P
+
 T VEC_add(T a, T b)
 {
     float x = a->x + b->x;

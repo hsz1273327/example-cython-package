@@ -1,58 +1,46 @@
-# distutils: extra_compile_args=-Wno-unreachable-code
-# distutils: include_dirs=binary_vector/inc
-# distutils: sources=binary_vector/src/binary_vector.c
-
-import cython
+import math
+import warnings
 from typing_extensions import Self
 
+warn_message = "model vector has cython implement, but now just pure python implement"
+warnings.warn(warn_message)
 
-if cython.compiled:
-    print("Vector compiled, c impl.")
-    from cython.cimports.binary_vector.binary_vector import BINARY_VECTOR_P, VEC_init, VEC_del, VEC_mod, VEC_add, VEC_mul
-else:
-    print("Vector not compiled, pure python impl.")
-    from .binary_vector_purepy import BINARY_VECTOR_P, VEC_init, VEC_del, VEC_mod, VEC_add, VEC_mul
 
-# from cython.cimports.binary_vector.binary_vector import BINARY_VECTOR_P, VEC_init, VEC_del, VEC_mod, VEC_add, VEC_mul
-
-@cython.cclass
 class Vector:
 
-    data: BINARY_VECTOR_P
+    _x: float
+    _y: float
+
+    @property
+    def x(self: Self) -> float:
+        return self._x
+
+    @property
+    def y(self: Self) -> float:
+        return self._y
 
     @staticmethod
-    @cython.cfunc
-    def create(ptr: BINARY_VECTOR_P):
+    def new(x: float, y: float):
         p = Vector()
-        p.data = ptr
+        p._x = x
+        p._y = y
         return p
 
-    @staticmethod
-    def new(x: cython.float, y: cython.float):
-        p = Vector()
-        p.data = VEC_init(x, y)
-        return p
+    def init(self: Self, x: float, y: float) -> None:
+        self._x = x
+        self._y = y
 
-    def init(self: Self, x: cython.float, y: cython.float):
-        self.data = VEC_init(x, y)
-
-    @cython.cfunc
-    def init_from_point(self: Self, ptr: BINARY_VECTOR_P) -> cython.void:
-        self.data = ptr
-
-    def __dealloc__(self: Self):
-        if self.data is not cython.NULL:
-            print(f"A dealloc")
-            VEC_del(self.data)
+    def __init__(self: Self) -> None:
+        self._x = 0
+        self._y = 0
 
     def mod(self: Self) -> float:
-        if self.data is not cython.NULL:
-            return VEC_mod(self.data)
-        raise Exception("vector not init")
+        return math.sqrt(self._x**2 + self._y**2)
 
-    def __add__(self: Self, other: 'Vector') -> 'Vector':
-        
-        return Vector.create(VEC_add(self.data, other.data))
+    def __add__(self: Self, other: Self) -> Self:
+        x = self._x+other.x
+        y = self._y+other.y
+        return Vector.new(x, y)
 
-    def __mul__(self: Self, other: 'Vector') -> float:
-        return VEC_mul(self.data, other.data)
+    def __mul__(self: Self, other: Self) -> float:
+        return self._x * other.x + self.y * other.y

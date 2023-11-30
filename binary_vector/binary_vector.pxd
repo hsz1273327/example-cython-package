@@ -1,3 +1,6 @@
+# distutils: language = c++
+# distutils: include_dirs = binary_vector
+# distutils: sources = binary_vector/binary_vector.cpp
 cdef extern from "binary_vector.h":
 
     cdef struct BINARY_VECTOR:
