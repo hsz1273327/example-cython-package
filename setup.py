@@ -235,10 +235,16 @@ class binary_build_ext(build_ext):
         for lib in add_libs:
             self.compiler.add_library(lib)
         logging.info(f'[build_ext]setting done')
-        # 针对clang:
+        # 针对平台编译器的额外参数
         if sys.platform == 'darwin':
-            ext.extra_compile_args += ["-Wc++11-extensions", "-std=c++11"]
-
+            # 针对clang:
+            ext.extra_compile_args += ["-Wno-unreachable-code","-Wc++11-extensions", "-std=c++11"]
+        elif sys.platform.startswith('linux'):
+            # 针对gcc
+            ext.extra_compile_args += ["-Wno-unreachable-code"]
+        else:
+            # 针对cl.exe
+            pass
         super().build_extension(ext)
 
 

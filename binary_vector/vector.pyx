@@ -1,5 +1,4 @@
 # distutils: language = c++
-# distutils: extra_compile_args = -Wno-unreachable-code
 # distutils: sources = binary_vector/binary_vector.cpp
 from .binary_vector cimport BINARY_VECTOR_P, VEC_init, VEC_del, VEC_mod, VEC_add, VEC_mul
 from libcpp.string cimport string
