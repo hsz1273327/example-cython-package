@@ -1,5 +1,4 @@
 # distutils: language = c++
-# distutils: libraries=spdlog
 
 cdef extern from "spdlog/spdlog.h" namespace "spdlog":
     cdef inline void trace[T](const T &msg)
