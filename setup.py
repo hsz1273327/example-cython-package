@@ -111,23 +111,28 @@ def build_spdlog() -> Tuple[str, Optional[str], Optional[str]]:
                 runcmd("make -j", cwd=to_build.joinpath("build"))
                 logging.info(f'[build spdlog]compile done')
                 # copy库文件
-                to.joinpath("lib").mkdir(exist_ok=True)
+                to.joinpath("lib").mkdir(parents=True, exist_ok=True)
                 shutil.copyfile(to_build.joinpath("build/libspdlog.a"),
                                 to.joinpath("lib/libspdlog.a"))
                 logging.info(f'[build spdlog]copy lib to {to} done')
             # copy头文件
-            shutil.copytree(to_build.joinpath(
-                "include"), to.joinpath("include"))
+            shutil.copytree(
+                to_build.joinpath("include"),
+                to.joinpath("include")
+            )
             logging.info(f'[build spdlog]copy header to {to} done')
-                
+
         except Exception as e:
+            logging.error(
+                f'[build spdlog]compiling get error {type(e)}:{str(e)}')
             raise e
         finally:
             # 删除编译源文件
             try:
                 shutil.rmtree(to_build)
             except Exception as e:
-                logging.warn(f'[build spdlog]remove build dir {to_build} get error, please remove it manually')
+                logging.warn(
+                    f'[build spdlog]remove build dir {to_build} get error, please remove it manually')
             else:
                 logging.info(f'[build spdlog]remove build dir {to_build} done')
     else:
@@ -237,7 +242,8 @@ class binary_build_ext(build_ext):
         # 针对平台编译器的额外参数
         if sys.platform == 'darwin':
             # 针对clang:
-            ext.extra_compile_args += ["-Wno-unreachable-code","-Wc++11-extensions", "-std=c++11"]
+            ext.extra_compile_args += ["-Wno-unreachable-code",
+                                       "-Wc++11-extensions", "-std=c++11"]
         elif sys.platform.startswith('linux'):
             # 针对gcc
             ext.extra_compile_args += ["-Wno-unreachable-code"]
