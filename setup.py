@@ -67,7 +67,7 @@ def runcmd(command: str, *, cwd: Optional[Path] = None, env: Optional[Dict[str, 
         return content
 
 
-def build_spdlog() -> Tuple[str, Optional[str]]:
+def build_spdlog() -> Tuple[str, Optional[str], Optional[str]]:
     """编译spdlog"""
     logging.info('[build spdlog] start!')
     # 检查系统中是否有相关的工具(git,cmake,make)
@@ -86,6 +86,7 @@ def build_spdlog() -> Tuple[str, Optional[str]]:
             logging.info(
                 f'[build spdlog]{to.parent} exists but not dir,please remove it first')
             raise Exception(f"{to.parent} is not dir")
+    inwondows = False
 
     if not to.is_dir():
         # 不存在则下载后从源码安装
@@ -99,21 +100,27 @@ def build_spdlog() -> Tuple[str, Optional[str]]:
         clone_cmd = f"git clone {url} {str(to_build)}"
         runcmd(clone_cmd, fail_exit=True)
         logging.info(f'[build spdlog]clone source done')
+
         try:
             logging.info(f'[build spdlog]compiling')
-            runcmd("mkdir build", cwd=to_build)
-            runcmd("cmake ..", cwd=to_build.joinpath("build"))
-            runcmd("make -j", cwd=to_build.joinpath("build"))
-            logging.info(f'[build spdlog]compile done')
+            if sys.platform.startswith('linux') or sys.platform == 'darwin':
+                # 非window平台
+                runcmd("mkdir build", cwd=to_build)
+                runcmd("cmake ..", cwd=to_build.joinpath("build"))
+                runcmd("make -j", cwd=to_build.joinpath("build"))
+                logging.info(f'[build spdlog]compile done')
+            else:
+                inwondows = True
             # copy头文件
             shutil.copytree(to_build.joinpath(
                 "include"), to.joinpath("include"))
             logging.info(f'[build spdlog]copy header to {to} done')
             # copy库文件
-            to.joinpath("lib").mkdir(exist_ok=True)
-            shutil.copyfile(to_build.joinpath("build/libspdlog.a"),
-                            to.joinpath("lib/libspdlog.a"))
-            logging.info(f'[build spdlog]copy lib to {to} done')
+            if not inwondows:
+                to.joinpath("lib").mkdir(exist_ok=True)
+                shutil.copyfile(to_build.joinpath("build/libspdlog.a"),
+                                to.joinpath("lib/libspdlog.a"))
+                logging.info(f'[build spdlog]copy lib to {to} done')
         except Exception as e:
             raise e
         finally:
@@ -122,7 +129,9 @@ def build_spdlog() -> Tuple[str, Optional[str]]:
             logging.info(f'[build spdlog]remove build dir {to_build} done')
     else:
         logging.info('[build spdlog]already build yet')
-    return str(to.joinpath("include")), str(to.joinpath("lib"))
+    if inwondows:
+        return str(to.joinpath("include")), None, None
+    return str(to.joinpath("include")), str(to.joinpath("lib")), "spdlog"
 
 
 # 待编译包对应的编译函数
@@ -208,10 +217,12 @@ class binary_build_ext(build_ext):
                 logging.error(
                     f'[build_ext]{libname } do not has compile function')
                 raise Exception(f"{libname} without compile function")
-            include_dir, lib_dir = cf()
+            include_dir, lib_dir, lib = cf()
             add_include_dirs.append(include_dir)
             if lib_dir:
                 add_lib_dirs.append(lib_dir)
+            if lib:
+                add_libs.append(lib)
 
         for inc in add_include_dirs:
             self.compiler.add_include_dir(inc)
