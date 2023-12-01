@@ -1,7 +1,15 @@
 name: Build
 
 on: 
-  workflow_dispatch
+  workflow_dispatch:
+    inputs:
+      withpypy:
+        description: 'True to print to STDOUT'
+        required: false
+        default: false
+        type: boolean
+  release:
+        types: [created]
 
 jobs:
   build_sdist:
@@ -55,7 +63,23 @@ jobs:
         with:
           platforms: all
 
-      - name: Build Wheels
+      - name: Build Wheels With Pypy 
+        if: ${{ inputs.withpypy }}
+        uses: pypa/cibuildwheel@v2.16.2
+        env:
+          # linux下编译哪些arch
+          CIBW_ARCHS_LINUX: x86_64 aarch64
+          # mac下编译哪些arch
+          CIBW_ARCHS_MACOS: x86_64 arm64
+          # windows下编译哪些arch
+          CIBW_ARCHS_WINDOWS: AMD64
+          # 注意,不在临时虚拟环境中编译
+          CIBW_BUILD_FRONTEND: "build; args: --no-isolation"
+          # 安装编译用的依赖
+          CIBW_BEFORE_BUILD: pip install Cython==3.0.6 chardet==5.2.0
+
+      - name: Build Wheels Without Pypy
+        if: ${{ !inputs.withpypy }} 
         uses: pypa/cibuildwheel@v2.16.2
         env:
 
