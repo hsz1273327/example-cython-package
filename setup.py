@@ -1,5 +1,6 @@
 import os
 import sys
+import platform
 import shutil
 import logging
 import subprocess
@@ -199,22 +200,27 @@ class binary_build_ext(build_ext):
                         noneed_downloads.append(libname)
 
         # elif sys.platform == 'darwin':
-        #     # macos,查看homebrew
-        #     sys_lib_base_dir = Path("/usr/local/Cellar")
+        #     # macos,查看homebrew链接的库
+        #     if platform.machine() == "x86_64":
+        #         sys_lib_base_dir = Path("/usr/local/include")
+        #     else:
+        #         sys_lib_base_dir = Path("/opt/homebrew/include")
+
         #     for libname in candidate_3rdpart:
         #         libpath = sys_lib_base_dir.joinpath(libname)
         #         if libpath.is_dir():
-        #             libversionpath = [i for i in libpath.iterdir() if i.is_dir() and not i.name.startswith(".")]
-        #             if len(libversionpath) >= 1:
-        #                 version = libversionpath[0].name
-        #                 noneed_downloads.append(libname)
+        #             libpath = sys_lib_base_dir.joinpath(libname)
+        #             if libpath.is_dir():
         #                 logging.info(f'[build_ext]{libname} use sys lib')
-        #                 if Path(f"/usr/local/Cellar/{libname}/{version}/include"):
-        #                     add_include_dirs.append(
-        #                         f"/usr/local/Cellar/{libname}/{version}/include")
-        #                 if Path(f"/usr/local/Cellar/{libname}/{version}/lib").is_dir():
-        #                     add_lib_dirs.append(
-        #                         f"/usr/local/Cellar/{libname}/{version}/lib")
+        #                 noneed_downloads.append(libname)
+        #             libpath = sys_lib_base_dir.joinpath(libname+".h")
+        #             if libpath.is_file():
+        #                 logging.info(f'[build_ext]{libname} use sys lib')
+        #                 noneed_downloads.append(libname)
+        #             libpath = sys_lib_base_dir.joinpath(libname+".hpp")
+        #             if libpath.is_file():
+        #                 logging.info(f'[build_ext]{libname} use sys lib')
+        #                 noneed_downloads.append(libname)
 
         need_downloads = list(set(candidate_3rdpart)-set(noneed_downloads))
         logging.info(f'[build_ext]{need_downloads} will install by source')
